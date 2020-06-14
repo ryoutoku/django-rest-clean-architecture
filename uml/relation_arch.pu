@@ -1,0 +1,38 @@
+@startuml relation arch
+
+title Django REST FrameworkとClean Architectureのマッピング
+
+rectangle original {
+    namespace views.py {
+        Class XXXViewSet
+    }
+
+    namespace serializers.py {
+        Class XXXSerializer
+    }
+
+    namespace models.py {
+        Class XXX
+    }
+    views.py.XXXViewSet -d-> serializers.py.XXXSerializer
+    views.py.XXXViewSet -d-> models.py.XXX
+    serializers.py.XXXSerializer -d-> models.py.XXX
+}
+
+rectangle CleanArchitecture {
+    namespace Frameworks_Drivers #A7D7FD {
+        namespace Interface_Adapters #A2FDBA {
+            namespace Application_Bussiness_Rules #FFA09C {
+                namespace Enterprise_Bussiness_Rules #FCFDB9 {
+                }
+            }
+            Class XXXViewSet
+            Class XXXSerializer
+            Class XXX
+            XXXViewSet -d-> XXXSerializer
+            XXXViewSet -d-> XXX
+            XXXSerializer -d-> XXX
+        }
+    }
+}
+@enduml

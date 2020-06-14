@@ -1,0 +1,82 @@
+@startuml new architecture
+
+title Clean Architectureを参考に設計
+
+namespace views.py #A2FDBA {
+    Class XXXViewSet
+    note left
+    serializerにvalidation含む業務ロジックを実装しないため、
+    usecase内のXXXServiceを必ず使う
+    endnote
+}
+
+namespace serializers.py #A2FDBA {
+    Class XXXSerializer
+    note left
+    Requestデータ - models 間の腐敗防止層に当たる
+    Commandのvalidationは、型チェックなどのみ行う
+    endnote
+}
+
+namespace models.py #A2FDBA {
+    Class XXX
+    note left
+    特にvalidationなど、業務ロジックは実装しない
+    saveはviewsやserializersから直接行わない。
+    endnote
+}
+
+namespace application_services.py #FFA19A {
+    Class XXXService
+    note right
+    Postで実行されたAPI毎に、
+    domainsを使ってタスク処理を行う
+    endnote
+}
+
+namespace domains #FCFEB9 {
+    Class Aggregate
+    Class DomainObject
+    Interface IXXXWriter
+    Interface IXXXReader
+
+    DomainObject *-l Aggregate
+    Aggregate <.u. IXXXWriter
+    Aggregate <.u. IXXXReader
+    IXXXWriter -r[hidden] IXXXReader
+}
+
+namespace repositories.py #A2FDBA {
+    Class XXXWriter
+    Class XXXReader
+    note right
+    modelsをWrap
+    * Aggregateを使って適切にmodelに保存(XXXWriter)
+    * modelを使って適切にAggregateを生成(XXXReader)
+    endnote
+
+    XXXWriter -d[hidden] XXXReader
+}
+
+views.py.XXXViewSet -d-> serializers.py.XXXSerializer
+views.py.XXXViewSet -d-> models.py.XXX
+serializers.py.XXXSerializer -d-> models.py.XXX
+
+
+serializers.py.XXXSerializer .r.> domains.Aggregate
+serializers.py.XXXSerializer .r.> domains.DomainObject
+
+views.py.XXXViewSet -r-> application_services.py.XXXService
+
+application_services.py.XXXService ..> domains.Aggregate
+application_services.py.XXXService ..> domains.DomainObject
+
+domains.IXXXWriter <|.. repositories.py.XXXWriter
+domains.IXXXReader <|.. repositories.py.XXXReader
+
+repositories.py.XXXWriter -> models.py.XXX
+repositories.py.XXXReader -> models.py.XXX
+
+
+
+@enduml

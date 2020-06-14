@@ -1,0 +1,33 @@
+@startuml base architecture
+
+title Django REST Framework簡易アーキテクチャ
+
+namespace views.py {
+  Class XXXViewSet
+}
+note right
+REST API実行時にロジックのエントリーポイントになるクラス
+Ruby on RailsでいうとAPIモードのControllerに相当
+endnote
+
+namespace serializers.py {
+  Class XXXSerializer
+}
+note right
+API毎に(requestの)パラメータとmodelを相互変換する
+パラメータがmodelに合致するか、といったバリデーションも提供
+endnote
+
+namespace models.py {
+  Class XXX
+}
+note right
+Active Record パターン実装(ORM)
+Ruby on Railsのmodelに相当
+endnote
+
+views.py.XXXViewSet -d-> serializers.py.XXXSerializer
+views.py.XXXViewSet -d-> models.py.XXX
+serializers.py.XXXSerializer -d-> models.py.XXX
+
+@enduml
